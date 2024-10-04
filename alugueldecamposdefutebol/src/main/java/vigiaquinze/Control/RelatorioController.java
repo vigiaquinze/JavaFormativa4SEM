@@ -27,6 +27,7 @@ public class RelatorioController {
                         rs.getDate("data"),
                         rs.getTime("hora_inicio"),
                         rs.getTime("hora_fim"),
+                        rs.getInt("preco_reserva"),
                         null,  // Deverá buscar o CampoController para obter esses dados
                         null   // Deverá buscar o ClienteController para obter esses dados
                 );

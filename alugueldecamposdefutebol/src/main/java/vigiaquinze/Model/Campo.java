@@ -12,7 +12,7 @@ public class Campo {
     private double preco;
     private List<Reserva> reservas;
 
-    //construtores
+    // Construtores
     public Campo(int id, String nome, String local, double preco) {
         this.id = id;
         this.nome = nome;
@@ -25,7 +25,13 @@ public class Campo {
         super();
     }
 
-    //métodos
+    // Sobrescrevendo o método toString
+    @Override
+    public String toString() {
+        return nome; // Retorna o nome do campo
+    }
+
+    // Métodos
     public boolean verificarDisponibilidade(Date data, Time horaInicio, Time horaFim) {
         for (Reserva reserva : reservas) {
             if (reserva.getData().equals(data) &&
@@ -36,7 +42,7 @@ public class Campo {
         return true;
     }
 
-    // Getters e setters
+    // Getters e Setters
     public int getId() {
         return id;
     }

@@ -8,7 +8,7 @@ import java.sql.Statement;
 
 public class ConnectionFactory {
     // atributos
-    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    private static final String URL = "jdbc:postgresql://localhost:5432/servico_aluguel_campos";
     private static final String USUARIO = "postgres";// nome do adm do banco de dados
     private static final String SENHA = "postgres";// senha do adm do banco de dados
     // métodos

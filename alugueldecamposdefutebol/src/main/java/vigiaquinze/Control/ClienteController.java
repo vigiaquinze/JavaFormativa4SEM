@@ -27,29 +27,30 @@ public class ClienteController {
         }
     }
 
-    // Renomeando para obterCliente
-    public Cliente buscarCliente(int id) {
-        String sql = "SELECT * FROM cliente WHERE id = ?";
-        Cliente cliente = null;
-
+    public List<Cliente> buscarClientesPorNome(String nome) {
+        String sql = "SELECT * FROM cliente WHERE nome ILIKE ?";
+        List<Cliente> clientes = new ArrayList<>();
+    
         try (Connection conn = ConnectionFactory.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + nome + "%");
             ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                cliente = new Cliente(
+    
+            while (rs.next()) {
+                Cliente cliente = new Cliente(
                         rs.getInt("id"),
                         rs.getString("nome"),
                         rs.getString("email"),
                         rs.getString("telefone"),
-                        rs.getString("tipo"));
+                        rs.getString("tipo")
+                );
+                clientes.add(cliente);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return cliente;
+    
+        return clientes;
     }
 
     public void atualizarCliente(Cliente cliente) {
@@ -79,7 +80,32 @@ public class ClienteController {
             e.printStackTrace();
         }
     }
+
+    public Cliente buscarClientePorId(int id) {
+        String sql = "SELECT * FROM cliente WHERE id = ?";
+        Cliente cliente = null;
     
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+    
+            if (rs.next()) {
+                cliente = new Cliente(
+                    rs.getInt("id"),
+                    rs.getString("nome"),
+                    rs.getString("email"),
+                    rs.getString("telefone"),
+                    rs.getString("tipo")  // Agora o tipo está corretamente preenchido
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return cliente;
+    }
+
     public List<Cliente> listarClientes() {
         String sql = "SELECT * FROM cliente";
         List<Cliente> clientes = new ArrayList<>();
@@ -102,7 +128,6 @@ public class ClienteController {
             e.printStackTrace();
         }
 
-        // Retorne a lista de clientes, mesmo que esteja vazia
         return clientes;
     }
 }

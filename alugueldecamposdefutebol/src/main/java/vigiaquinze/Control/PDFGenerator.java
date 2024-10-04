@@ -6,6 +6,7 @@ import vigiaquinze.Model.Reserva;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font; // Importando a fonte
 
 import java.io.IOException;
 
@@ -17,6 +18,7 @@ public class PDFGenerator {
 
         try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
             contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12); // Define a fonte antes de adicionar texto
             contentStream.setLeading(14.5f);
             contentStream.newLineAtOffset(25, 750);
 
