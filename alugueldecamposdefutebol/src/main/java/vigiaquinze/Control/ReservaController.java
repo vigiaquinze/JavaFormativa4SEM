@@ -26,7 +26,7 @@ public class ReservaController {
             stmt.setTime(3, reserva.getHoraFim());
             stmt.setInt(4, reserva.getCampo().getId());
             stmt.setInt(5, reserva.getCliente().getId());
-            stmt.setInt(6, reserva.getPreco_reserva());
+            stmt.setInt(6, reserva.getPrecoReserva());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

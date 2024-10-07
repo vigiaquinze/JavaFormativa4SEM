@@ -10,14 +10,14 @@ public class Reserva {
     private Time horaFim;
     private Campo campo;
     private Cliente cliente;
-    private int preco_reserva;
+    private int precoReserva;
 
-    public Reserva(int id, Date data, Time horaInicio, Time horaFim, int preco_reserva, Campo campo, Cliente cliente) {
+    public Reserva(int id, Date data, Time horaInicio, Time horaFim, int precoReserva, Campo campo, Cliente cliente) {
         this.id = id;
         this.data = data;
         this.horaInicio = horaInicio;
         this.horaFim = horaFim;
-        this.preco_reserva = preco_reserva;
+        this.precoReserva = precoReserva;
         this.campo = campo;
         this.cliente = cliente;
     }    
@@ -77,12 +77,12 @@ public class Reserva {
         this.cliente = cliente;
     }
 
-    public int getPreco_reserva() {
-        return preco_reserva;
+    public int getPrecoReserva() {
+        return precoReserva;
     }
 
-    public void setPreco_reserva(int preco_reserva) {
-        this.preco_reserva = preco_reserva;
+    public void setPrecoReserva(int precoReserva) {
+        this.precoReserva = precoReserva;
     }
 
 }

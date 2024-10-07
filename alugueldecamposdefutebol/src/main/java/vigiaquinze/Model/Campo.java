@@ -21,6 +21,12 @@ public class Campo {
         this.reservas = new ArrayList<>();
     }
 
+    public Campo(int id, String nome, double preco) {
+        this.id = id;
+        this.nome = nome;
+        this.preco = preco;
+    }
+
     public Campo() {
         super();
     }

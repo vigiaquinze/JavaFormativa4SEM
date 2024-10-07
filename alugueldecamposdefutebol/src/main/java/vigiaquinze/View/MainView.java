@@ -44,17 +44,9 @@ public class MainView extends JFrame {
             }
         });
 
-        relatorioButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RelatorioView relatorioView = new RelatorioView();
-                relatorioView.setVisible(true);
-            }
-        });
-
         panel.add(clienteButton);
         panel.add(campoButton);
         panel.add(reservaButton);
-        panel.add(relatorioButton);
 
         add(panel);
     }

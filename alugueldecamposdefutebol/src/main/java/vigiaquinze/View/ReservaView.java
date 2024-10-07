@@ -3,12 +3,10 @@ package vigiaquinze.View;
 import vigiaquinze.Control.ReservaController;
 import vigiaquinze.Control.CampoController;
 import vigiaquinze.Control.ClienteController;
-import vigiaquinze.Control.RelatorioController; // Importar o RelatorioController
+import vigiaquinze.Control.PDFGenerator; // Importar PDFGenerator
 import vigiaquinze.Model.Reserva;
 import vigiaquinze.Model.Campo;
 import vigiaquinze.Model.Cliente;
-import vigiaquinze.Model.Relatorio;
-import vigiaquinze.Control.PDFGenerator; // Importar PDFGenerator
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -16,9 +14,9 @@ import org.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.Calendar;
@@ -35,7 +33,7 @@ public class ReservaView extends JFrame {
     private JButton adicionarButton;
     private JButton buscarButton;
     private JButton excluirButton; // Novo botão para excluir reservas
-    private JButton gerarRelatorioButton; // Botão para gerar relatório
+    private JButton gerarRelatorioButton; // Novo botão para gerar relatórios
     private JTable reservaTable;
     private DefaultTableModel tableModel;
     private ReservaController reservaController;
@@ -68,7 +66,6 @@ public class ReservaView extends JFrame {
         adicionarButton = new JButton("Adicionar Reserva");
         buscarButton = new JButton("Buscar Cliente");
         excluirButton = new JButton("Excluir Reserva"); // Inicialização do botão de exclusão
-        gerarRelatorioButton = new JButton("Gerar Relatório"); // Inicialização do botão de gerar relatório
 
         // Configurar o JDatePicker
         UtilDateModel model = new UtilDateModel();
@@ -133,143 +130,145 @@ public class ReservaView extends JFrame {
         gbc.gridy = 6;
         inputPanel.add(excluirButton, gbc); // Adiciona o botão de exclusão
 
-        gbc.gridx = 0; // Ajuste a posição do botão de gerar relatório
-        gbc.gridy = 7;
-        inputPanel.add(gerarRelatorioButton, gbc); // Adiciona o botão de gerar relatório
-
         panel.add(inputPanel, BorderLayout.NORTH);
 
         // Configurar a tabela
         tableModel = new DefaultTableModel(
-                new Object[]{"ID", "Data", "Hora Início", "Hora Fim", "Campo", "Cliente", "Total a pagar"}, 0);
+                new Object[] { "ID", "Data", "Hora Início", "Hora Fim", "Campo", "Cliente", "Total a pagar" },
+                0);
         reservaTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(reservaTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
+        // Novo botão para gerar o relatório
+        gerarRelatorioButton = new JButton("Gerar Relatório");
+        panel.add(gerarRelatorioButton, BorderLayout.SOUTH);
+
         // ActionListener para o botão de busca
-        buscarButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String nome = clienteNomeField.getText();
-                List<Cliente> clientes = clienteController.buscarClientesPorNome(nome);
-                if (!clientes.isEmpty()) {
-                    Cliente cliente = clientes.get(0); // Assume que pega o primeiro cliente encontrado
-                    clienteNomeField.setText(cliente.getNome());
-                    System.out.println("Cliente encontrado!");
-                } else {
-                    System.out.println("Cliente não encontrado.");
-                }
+        buscarButton.addActionListener(e -> {
+            String nome = clienteNomeField.getText();
+            List<Cliente> clientes = clienteController.buscarClientesPorNome(nome);
+            if (!clientes.isEmpty()) {
+                Cliente cliente = clientes.get(0); // Assume que pega o primeiro cliente encontrado
+                clienteNomeField.setText(cliente.getNome());
+                System.out.println("Cliente encontrado!");
+            } else {
+                System.out.println("Cliente não encontrado.");
             }
         });
 
         // ActionListener para o botão de adicionar reserva
-        adicionarButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String nome = clienteNomeField.getText();
-                List<Cliente> clientes = clienteController.buscarClientesPorNome(nome);
-                if (!clientes.isEmpty()) {
-                    Cliente cliente = clientes.get(0); // Assume que pega o primeiro cliente encontrado
-                    Campo campo = (Campo) campoComboBox.getSelectedItem();
+        adicionarButton.addActionListener(e -> {
+            String nome = clienteNomeField.getText();
+            List<Cliente> clientes = clienteController.buscarClientesPorNome(nome);
+            if (!clientes.isEmpty()) {
+                Cliente cliente = clientes.get(0); // Assume que pega o primeiro cliente encontrado
+                Campo campo = (Campo) campoComboBox.getSelectedItem();
 
-                    // Obter a data selecionada
-                    java.util.Date utilDate = (java.util.Date) dataPicker.getModel().getValue(); // Obtém a data como java.util.Date
-                    Date selectedDate = new Date(utilDate.getTime()); // Converte para java.sql.Date
+                // Obter a data selecionada
+                java.util.Date utilDate = (java.util.Date) dataPicker.getModel().getValue(); // Obtém a data como
+                                                                                             // java.util.Date
+                Date selectedDate = new Date(utilDate.getTime()); // Converte para java.sql.Date
 
-                    // Obter a hora de início e fim
-                    Time horaInicio = Time.valueOf((String) horaInicioBox.getSelectedItem());
-                    Time horaFim = Time.valueOf((String) horaFimBox.getSelectedItem());
+                // Obter a hora de início e fim
+                Time horaInicio = Time.valueOf((String) horaInicioBox.getSelectedItem());
+                Time horaFim = Time.valueOf((String) horaFimBox.getSelectedItem());
 
-                    // Verificar se o horário está disponível
-                    if (!reservaController.verificarHorarioDisponivel(selectedDate, horaInicio, campo)) {
-                        JOptionPane.showMessageDialog(panel, "Este horário para o campo selecionado já está ocupado. Por favor, escolha outro.", "Erro", JOptionPane.ERROR_MESSAGE);
-                        return; // Não prosseguir se o horário já estiver ocupado
-                    }
-
-                    // Calcular o número de horas de reserva
-                    long diff = horaFim.getTime() - horaInicio.getTime();
-                    int horas = (int) Math.floor(diff / (1000 * 60 * 60)); // converter milissegundos para horas
-
-                    // Calcular o preço da reserva
-                    int precoReserva = (int) (horas * campo.getPreco()); // Truncar a parte decimal
-
-                    // Criar a reserva com o preço calculado
-                    Reserva reserva = new Reserva(
-                            0,
-                            selectedDate, // Usando a data selecionada
-                            horaInicio,
-                            horaFim,
-                            precoReserva, // usando o preço calculado
-                            campo,
-                            cliente);
-
-                    // Adicionar a reserva ao controlador
-                    reservaController.adicionarReserva(reserva);
-                    System.out.println("Reserva adicionada com sucesso!");
-                    limparCampos(); // Limpar os campos após adicionar uma reserva
-                    atualizarTabela(); // Atualizar a tabela após adicionar uma reserva
-                } else {
-                    System.out.println("Cliente não encontrado. Não é possível adicionar a reserva.");
+                // Verificar se o horário está disponível
+                if (!reservaController.verificarHorarioDisponivel(selectedDate, horaInicio, campo)) {
+                    JOptionPane.showMessageDialog(panel,
+                            "Este horário para o campo selecionado já está ocupado. Por favor, escolha outro.", "Erro",
+                            JOptionPane.ERROR_MESSAGE);
+                    return; // Não prosseguir se o horário já estiver ocupado
                 }
+
+                // Calcular o número de horas de reserva
+                long diff = horaFim.getTime() - horaInicio.getTime();
+                int horas = (int) Math.floor(diff / (1000 * 60 * 60)); // converter milissegundos para horas
+
+                // Calcular o preço da reserva
+                int precoReserva = (int) (horas * campo.getPreco()); // Truncar a parte decimal
+
+                // Criar a reserva com o preço calculado
+                Reserva reserva = new Reserva(
+                        0,
+                        selectedDate, // Usando a data selecionada
+                        horaInicio,
+                        horaFim,
+                        precoReserva, // usando o preço calculado
+                        campo,
+                        cliente);
+
+                // Adicionar a reserva ao controlador
+                reservaController.adicionarReserva(reserva);
+                System.out.println("Reserva adicionada com sucesso!");
+                limparCampos(); // Limpar os campos após adicionar uma reserva
+                atualizarTabela(); // Atualizar a tabela após adicionar uma reserva
+            } else {
+                System.out.println("Cliente não encontrado. Não é possível adicionar reserva.");
             }
         });
 
-        // ActionListener para o botão de exclusão
-        excluirButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = reservaTable.getSelectedRow(); // Obtém a linha selecionada
-
-                if (selectedRow != -1) { // Verifica se alguma linha está selecionada
-                    int reservaId = (int) tableModel.getValueAt(selectedRow, 0); // Obtém o ID da reserva
-                    reservaController.deletarReserva(reservaId); // Exclui a reserva
-                    atualizarTabela(); // Atualiza a tabela
-                    JOptionPane.showMessageDialog(panel, "Reserva excluída com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(panel, "Selecione uma reserva para excluir.", "Erro", JOptionPane.ERROR_MESSAGE);
-                }
+        // ActionListener para o botão de exclusão de reserva
+        excluirButton.addActionListener(e -> {
+            int selectedRow = reservaTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int reservaId = (int) tableModel.getValueAt(selectedRow, 0); // Obter ID da reserva
+                reservaController.deletarReserva(reservaId); // Chamar o método para excluir a reserva
+                atualizarTabela(); // Atualizar a tabela após exclusão
+                JOptionPane.showMessageDialog(panel, "Reserva excluída com sucesso!", "Sucesso",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(panel, "Selecione uma reserva para excluir.", "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
         // ActionListener para o botão de gerar relatório
-        gerarRelatorioButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                List<Reserva> reservas = reservaController.listarReservas(); // Obter a lista de reservas
-                if (!reservas.isEmpty()) {
-                    PDFGenerator pdfGenerator = new PDFGenerator();
-                    Relatorio relatorio = new Relatorio(reservas); // Criar o relatorio com as reservas
-                    pdfGenerator.generate(relatorio); // Gerar o PDF com o relatório
-                    JOptionPane.showMessageDialog(panel, "Relatório gerado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(panel, "Não há reservas para gerar o relatório.", "Erro", JOptionPane.ERROR_MESSAGE);
-                }
+        gerarRelatorioButton.addActionListener(e -> {
+            int selectedRow = reservaTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int reservaId = (int) tableModel.getValueAt(selectedRow, 0); // Obter ID da reserva
+                Reserva reserva = reservaController.buscarReserva(reservaId); // Buscar a reserva pelo ID
+                PDFGenerator pdfGenerator = new PDFGenerator();
+                pdfGenerator.gerarRelatorioReserva(reserva); // Chamar o método para gerar o relatório
+                JOptionPane.showMessageDialog(panel, "Relatório gerado com sucesso!", "Sucesso",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(panel, "Selecione uma reserva para gerar o relatório.", "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Configuração da interface
+        // Adicionando a tabela ao painel
+        panel.add(scrollPane, BorderLayout.CENTER);
         setContentPane(panel);
+        atualizarTabela(); // Atualizar a tabela ao abrir a janela
         setVisible(true);
-        atualizarTabela(); // Atualiza a tabela ao iniciar a interface
     }
 
+    // Método para limpar os campos de entrada
     private void limparCampos() {
         clienteNomeField.setText("");
         horaInicioBox.setSelectedIndex(0);
         horaFimBox.setSelectedIndex(0);
         campoComboBox.setSelectedIndex(0);
-        dataPicker.getModel().setValue(null); // Limpa o JDatePicker
+        dataPicker.getModel().setValue(null); // Limpar o JDatePicker
     }
 
-    private void atualizarTabela() {
-        // Limpa a tabela antes de atualizar
-        tableModel.setRowCount(0);
-        List<Reserva> reservas = reservaController.listarReservas(); // Obtenha a lista de reservas
+    // Método para atualizar a tabela de reservas
+    public void atualizarTabela() {
+        tableModel.setRowCount(0); // Limpa a tabela atual
+        List<Reserva> reservas = reservaController.listarReservas(); // Busca todas as reservas
         for (Reserva reserva : reservas) {
-            tableModel.addRow(new Object[]{
-                    reserva.getId(),
-                    reserva.getData(),
-                    reserva.getHoraInicio(),
-                    reserva.getHoraFim(),
-                    reserva.getCampo(),
-                    reserva.getCliente(),
-                    reserva.getPreco_reserva() // Coloque o preço da reserva
+            tableModel.addRow(new Object[] {
+                reserva.getId(),
+                reserva.getData(),
+                reserva.getHoraInicio(),
+                reserva.getHoraFim(),
+                reserva.getCampo().getNome(),
+                reserva.getCliente().getNome(),
+                "R$"+reserva.getPrecoReserva()+",00"
             });
         }
     }
