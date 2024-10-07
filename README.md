@@ -102,6 +102,6 @@
 
 ## 6 - Relatórios
 - Um exemplo de relatório gerado pelo programa:
-    ![Relatório de reserva gerado pelo programa](docs/img/manual/7.PNG)
+    ![Relatório de reserva gerado pelo](docs/img/manual/7.PNG)
 
 ## 7 - Vídeo de demonstração
