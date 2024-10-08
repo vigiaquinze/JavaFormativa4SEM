@@ -21,6 +21,17 @@ public class Reserva {
         this.campo = campo;
         this.cliente = cliente;
     }    
+
+        // Construtor para testes
+        public Reserva(int id, Date data, Time horaInicio, Time horaFim, Campo campo, Cliente cliente, int precoReserva) {
+            this.id = id;
+            this.data = data;
+            this.horaInicio = horaInicio;
+            this.horaFim = horaFim;
+            this.campo = campo;
+            this.cliente = cliente;
+            this.precoReserva = precoReserva;
+        }
     
 
     public Reserva() {
