@@ -31,15 +31,6 @@ Criado com o Maven e sem um arquétipo, estruturado com o método MVC (Model, Vi
         CONSTRAINT horario_unico UNIQUE (campo_id, data, hora_inicio, hora_fim)
     );
 
-    -- Criar a tabela de relatórios
-    CREATE TABLE relatorio (
-        id SERIAL PRIMARY KEY,
-        cliente_id INT REFERENCES cliente(id) ON DELETE CASCADE,
-        campo_id INT REFERENCES campo(id) ON DELETE CASCADE,
-        data DATE NOT NULL,
-        hora_inicio TIME NOT NULL,
-        hora_fim TIME NOT NULL
-    );
 
 ## 3 - Documentação Técnica
 ### Diagrama de classes
